@@ -91,7 +91,6 @@ class VacuumPlanning(Problem):
 
         print(possible_actions)
 
-        print("actions: to be completed by students (hint:use possible_neighbors)")
 
         return possible_actions
 
@@ -99,7 +98,14 @@ class VacuumPlanning(Problem):
         """ Given state and action, return a new state that is the result of the action.
         Action is assumed to be a valid action in the state """
         new_state = list(state)
-        print("result(): to be completed by students")
+        if action == "UP":
+            new_state[1] += 1
+        elif action == "DOWN":
+            new_state[1] -= 1
+        elif action == "LEFT":
+            new_state[0] -= 1
+        elif action == "RIGHT":
+            new_state[0] += 1
         return new_state
 
     def goal_test(self, state):

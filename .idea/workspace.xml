@@ -10,6 +10,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/searchAssignment.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/searchAssignment.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/search.py" beforeDir="false" afterPath="$PROJECT_DIR$/search.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xy_vacuum_environment_search.py" beforeDir="false" afterPath="$PROJECT_DIR$/xy_vacuum_environment_search.py" afterDir="false" />
     </list>
@@ -49,7 +50,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/xy_vacuum_environment_search.py</url>
-          <line>422</line>
+          <line>428</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
