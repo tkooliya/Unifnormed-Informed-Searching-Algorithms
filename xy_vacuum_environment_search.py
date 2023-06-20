@@ -66,7 +66,31 @@ class VacuumPlanning(Problem):
         in any given state of the environment """
 
         possible_neighbors = self.env.things_near(state)
+
+        agentLocationx, agentLocationy  = env.agent.location
+
         possible_actions = ['UP', 'DOWN', 'LEFT', 'RIGHT']
+
+        for tuple in possible_neighbors:
+            object = tuple[0]
+            x,y = tuple[0].location
+            dx = x - agentLocationx
+            dy = y - agentLocationy
+
+            if(isinstance(object, Wall) and dx > 0):
+                possible_actions.remove('RIGHT')
+
+            if(isinstance(object, Wall) and dx < 0):
+                possible_actions.remove('LEFT')
+
+            if(isinstance(object, Wall) and dy > 0):
+                possible_actions.remove('UP')
+
+            if(isinstance(object, Wall) and dy < 0):
+                possible_actions.remove('DOWN')
+
+        print(possible_actions)
+
         print("actions: to be completed by students (hint:use possible_neighbors)")
 
         return possible_actions
@@ -185,7 +209,7 @@ class Gui(VacuumEnvironment):
         for frame in self.frames:
             button_row = []
             for _ in range(w):
-                button = Button(frame, bg='white', state='normal', height=1, width=1, padx=1, pady=1)
+                button = Button(frame, bg='white', state='normal', height=3, width=5, padx=3, pady=3)
                 button.config(command=lambda btn=button: self.toggle_element(btn))
                 button.pack(side='left')
                 button_row.append(button)
@@ -265,8 +289,7 @@ class Gui(VacuumEnvironment):
 
     def execute_action(self, agent, action):
         """Determines the action the agent performs."""
-        print("execute_actin: to be done by students")
-
+        xi, yi = agent.location
         NumSteps_label.config(text=str(self.stepCount))
         TotalCost_label.config(text=str(self.agent.performance))
 

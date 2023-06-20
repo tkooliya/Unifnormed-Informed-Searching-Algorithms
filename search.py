@@ -206,7 +206,9 @@ def breadth_first_graph_search(problem):
     while frontier:
         node = frontier.popleft()
         explored.add(tuple(node.state))
+        print("testing frontier")
         for child in node.expand(problem):
+            print("testing child in expand")
             if tuple(child.state) not in explored and child not in frontier:
                 if problem.goal_test(child.state):
                     return child, explored
