@@ -3,6 +3,7 @@ from tkinter import *
 from agents import *
 from search import *
 import sys
+import math
 import copy
 from utils import PriorityQueue
 
@@ -42,19 +43,33 @@ class VacuumPlanning(Problem):
         self.state = env.agent.location
         super().__init__(self.state)
         if self.searchType == 'BFS':
-            path, explored = breadth_first_graph_search(self)
-            sol = path.solution()
-            self.env.set_solution(sol)
-            self.env.display_explored(explored)
-            self.display_solution(path.solution())
-        elif self.searchType == 'DFS':
-            path, explored = depth_first_graph_search(self)
-            self.env.set_solution(path.solution())
-            self.env.display_explored(explored)
-            self.display_solution(path.solution())
-        elif self.searchType == 'UCS':
-            self.env.solution = best_first_graph_search(self, lambda node: node.execute_cost).solution()
+            try:
+                path, explored = breadth_first_graph_search(self)
+                sol = path.solution()
+                self.env.set_solution(sol)
+                self.env.display_explored(explored)
+                self.display_solution(path.solution())
+            except:
+                raise(Exception("ERROR: The board is unsolvable!"))
 
+        elif self.searchType == 'DFS':
+            try:
+                path, explored = depth_first_graph_search(self)
+                self.env.set_solution(path.solution())
+                self.env.display_explored(explored)
+                self.display_solution(path.solution())
+            except:
+                raise(Exception("ERROR: The board is unsolvable!"))
+
+        elif self.searchType == 'UCS':
+            try:
+                path, explored = best_first_graph_search(self, lambda node: node.path_cost)
+                sol = path.solution()
+                self.env.set_solution(sol)
+                self.env.display_explored(explored)
+                self.display_solution(path.solution())
+            except:
+                raise (Exception("ERROR: The board is unsolvable!"))
         elif self.searchType == 'A*':
             self.env.solution = astar_search(self.searchAgent).solution()
         else:
@@ -65,6 +80,7 @@ class VacuumPlanning(Problem):
         self.generateSolution()
 
     def display_solution(self, path):
+    #need a try and catch statement!
         x, y = self.agent.location
         positions = []
         for dir in path:
@@ -103,9 +119,6 @@ class VacuumPlanning(Problem):
             elif(isinstance(object, Wall) and dy < 0):
                 possible_actions.remove('DOWN')
 
-        print(possible_actions)
-
-
         return possible_actions
 
     def result(self, state, action):
@@ -128,14 +141,19 @@ class VacuumPlanning(Problem):
 
 
     def path_cost(self, c, state1, action, state2):
+        x1, y1 = state1
+        x2, y2 = state2
+
         """To be used for UCS and A* search. Returns the cost of a solution path that arrives at state2 from
         state1 via action, assuming cost c to get up to state1. For our problem
         state is (x, y) coordinate pair. To make our problem more interesting we are going to associate
         a height to each state as z = sqrt(x*x + y*y). This effectively means our grid is a bowl shape and
         the center of the grid is the center of the bowl. So now the distance between 2 states become the
         square of Euclidean distance as distance = (x1-x2)^2 + (y1-y2)^2 + (z1-z2)^2"""
+        distance = math.sqrt((x1-x2)**2 + (y1-y2)**2)
+
         print("path_cost: students must modify this cost using the above comment.")
-        return c + 1
+        return c + distance
 
 
     def h(self, node):
@@ -382,12 +400,17 @@ class Gui(VacuumEnvironment):
     def run(self, delay=0.5):
         """Run the Environment for given number of time steps,"""
         self.running = True
+
         for step in range(1000):
             if env.dirtCount == 0:
                 return
-            self.update_env()
-            sleep(delay)
-            Tk.update(self.root)
+            try:
+                self.update_env()
+                sleep(delay)
+                Tk.update(self.root)
+            except Exception as e:
+                print(e)
+                break
         print("ERROR: A solution was not reachable")
 
     def reset_env(self):
