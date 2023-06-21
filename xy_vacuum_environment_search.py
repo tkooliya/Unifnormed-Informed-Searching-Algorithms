@@ -71,7 +71,14 @@ class VacuumPlanning(Problem):
             except:
                 raise (Exception("ERROR: The board is unsolvable!"))
         elif self.searchType == 'A*':
-            self.env.solution = astar_search(self.searchAgent).solution()
+            try:
+                path, explored = astar_search(self)
+                sol = path.solution()
+                self.env.set_solution(sol)
+                self.env.display_explored(explored)
+                self.display_solution(path.solution())
+            except:
+                raise (Exception("ERROR: The board is unsolvable!"))
         else:
             raise 'NameError'
 
@@ -150,18 +157,43 @@ class VacuumPlanning(Problem):
         a height to each state as z = sqrt(x*x + y*y). This effectively means our grid is a bowl shape and
         the center of the grid is the center of the bowl. So now the distance between 2 states become the
         square of Euclidean distance as distance = (x1-x2)^2 + (y1-y2)^2 + (z1-z2)^2"""
-        distance = math.sqrt((x1-x2)**2 + (y1-y2)**2)
+        z1 = math.sqrt(x1*x1 + y1*y1)
+        z2 = math.sqrt(x2*x2 + y2*y2)
+        distance = (x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2
 
         print("path_cost: students must modify this cost using the above comment.")
-        return c + distance
+        return c + abs(distance)
 
 
     def h(self, node):
         """ to be used for A* search. Return the heuristic value for a given state. For this problem use minimum Manhattan
-        distance to all the dirty rooms + absolute value of height distance as described above in path_cost() function. .
-    """
-        print("h (heuristic): to be defined and implemented by students.")
-        return 0
+        distance to all the dirty rooms + absolute value of height distance as described above in path_cost() function. ."""
+        g = node.path_cost
+        dirt = []
+        hcost = []
+        manhattan = []
+        xi, yi = self.agent.location
+        for j, btn_row in enumerate(self.env.buttons):
+            for i, btn in enumerate(btn_row):
+                if (j != 0 and j != len(self.env.buttons) - 1) and (i != 0 and i != len(btn_row) - 1):
+                    if self.env.some_things_at((i, j)):
+                        for thing in self.env.list_things_at((i, j)):
+                            if isinstance(thing, Dirt):
+                                dirt.append((i,j)) #Add coordinates relating to dirt piles
+        print(self.agent.location)
+        nx, ny = node.state
+
+        for xd, yd in dirt:
+            manhattan.append(abs(xi - xd) + abs(yi - yd))
+
+        for (dirtx, dirty) in dirt:
+            hcost.append(abs(nx - dirtx) + abs(ny - dirty))
+
+        totalcost = manhattan + hcost
+
+
+        #print("h (heuristic): to be defined and implemented by students.")
+        return min(totalcost)
 
 # ______________________________________________________________________________
 
@@ -247,7 +279,7 @@ class Gui(VacuumEnvironment):
         for frame in self.frames:
             button_row = []
             for _ in range(w):
-                button = Button(frame, bg='white', state='normal', height=3, width=5, padx=3, pady=3)
+                button = Button(frame, bg='white', state='normal', height=2, width=3, padx=3, pady=3)
                 button.config(command=lambda btn=button: self.toggle_element(btn))
                 button.pack(side='left')
                 button_row.append(button)
