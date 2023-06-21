@@ -47,9 +47,12 @@ class VacuumPlanning(Problem):
             self.env.set_solution(sol)
             self.env.display_explored(explored)
         elif self.searchType == 'DFS':
-            self.env.solution = depth_first_graph_search(self).solution()
+            path, explored = depth_first_graph_search(self)
+            self.env.set_solution(path.solution())
+            self.env.display_explored(explored)
         elif self.searchType == 'UCS':
-            self.env.solution = best_first_graph_search(self, lambda node: node.path_cost).solution()
+            self.env.solution = best_first_graph_search(self, lambda node: node.execute_cost).solution()
+
         elif self.searchType == 'A*':
             self.env.solution = astar_search(self.searchAgent).solution()
         else:
@@ -67,7 +70,7 @@ class VacuumPlanning(Problem):
 
         possible_neighbors = self.env.things_near(state)
 
-        agentLocationx, agentLocationy  = env.agent.location
+        agentLocationx, agentLocationy  = state
 
         possible_actions = ['UP', 'DOWN', 'LEFT', 'RIGHT']
 
@@ -80,13 +83,13 @@ class VacuumPlanning(Problem):
             if(isinstance(object, Wall) and dx > 0):
                 possible_actions.remove('RIGHT')
 
-            if(isinstance(object, Wall) and dx < 0):
+            elif(isinstance(object, Wall) and dx < 0):
                 possible_actions.remove('LEFT')
 
-            if(isinstance(object, Wall) and dy > 0):
+            elif(isinstance(object, Wall) and dy > 0):
                 possible_actions.remove('UP')
 
-            if(isinstance(object, Wall) and dy < 0):
+            elif(isinstance(object, Wall) and dy < 0):
                 possible_actions.remove('DOWN')
 
         print(possible_actions)
@@ -98,13 +101,13 @@ class VacuumPlanning(Problem):
         """ Given state and action, return a new state that is the result of the action.
         Action is assumed to be a valid action in the state """
         new_state = list(state)
-        if action == "UP":
+        if action == 'UP':
             new_state[1] += 1
-        elif action == "DOWN":
+        elif action == 'DOWN':
             new_state[1] -= 1
-        elif action == "LEFT":
+        elif action == 'LEFT':
             new_state[0] -= 1
-        elif action == "RIGHT":
+        elif action == 'RIGHT':
             new_state[0] += 1
         return new_state
 
@@ -260,6 +263,7 @@ class Gui(VacuumEnvironment):
 
     def display_explored(self, explored):
         """display explored slots in a light pink color"""
+        xi, yi = self.agent.location
         if len(self.explored) > 0:     # means we have explored list from previous search. So need to clear their visual fist
             for (x, y) in self.explored:
                 self.buttons[y][x].config(bg='white')
@@ -267,6 +271,8 @@ class Gui(VacuumEnvironment):
         self.explored = explored
         for (x, y) in explored:
             self.buttons[y][x].config(bg='pink')
+
+        self.buttons[yi][xi].config(text=agent_label(self.agent), state='disabled', disabledforeground='black')
 
     def add_agent(self, agt, loc):
         """add an agent to the GUI"""
@@ -296,6 +302,27 @@ class Gui(VacuumEnvironment):
     def execute_action(self, agent, action):
         """Determines the action the agent performs."""
         xi, yi = agent.location
+        xf, yf = xi, yi
+
+        if action == 'Suck':
+            super().execute_action(agent, action)
+            self.buttons[yi][xi].config(bg = 'white', text = agent_label(agent), state = 'disabled', disabledforeground = 'black')
+
+        else:
+            if action == 'UP':
+                yf += 1
+            elif action == 'DOWN':
+                yf -= 1
+            elif action == 'LEFT':
+                xf -= 1
+            elif action == 'RIGHT':
+                xf += 1
+            else:
+                print("ERROR: NO VALID ACTIONS")
+        self.move_to(agent, [xf, yf])
+
+        self.buttons[yf][xf].config(text=agent_label(agent), state='disabled', disabledforeground='black')
+        self.buttons[yi][xi].config(bg='white', text='', state='disabled', disabledforeground='black')
         NumSteps_label.config(text=str(self.stepCount))
         TotalCost_label.config(text=str(self.agent.performance))
 
@@ -341,9 +368,16 @@ class Gui(VacuumEnvironment):
             self.execute_action(self.agent, move)
 
 
-    def run(self, delay=2):
+    def run(self, delay=0.5):
         """Run the Environment for given number of time steps,"""
-        print("run: to be implemented by students")
+        self.running = True
+        for step in range(1000):
+            if env.dirtCount == 0:
+                return
+            self.update_env()
+            sleep(delay)
+            Tk.update(self.root)
+        print("ERROR: A solution was not reachable")
 
     def reset_env(self):
         """Resets the GUI and agents environment to the initial clear state."""

@@ -533,10 +533,10 @@ class XYEnvironment(Environment):
             thing.location = destination
             for o in self.observers:
                 o.thing_moved(thing)
-            for t in thing.holding:
-                self.delete_thing(t)
-                self.add_thing(t, destination)
-                t.location = destination
+            #for t in thing.holding:
+                #self.delete_thing(t)
+                #self.add_thing(t, destination)
+                #t.location = destination
         return thing.bump
 
     def add_thing(self, thing, location=None, exclude_duplicate_class_items=False):
