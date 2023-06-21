@@ -5,11 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="36195a58-ad32-4c97-8b66-ec10ad213520" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/searchAssignment.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/searchAssignment.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/search.py" beforeDir="false" afterPath="$PROJECT_DIR$/search.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xy_vacuum_environment_search.py" beforeDir="false" afterPath="$PROJECT_DIR$/xy_vacuum_environment_search.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -32,7 +28,7 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "UCS-Method",
     "last_opened_file_path": "C:/Users/Kooliyath/Documents/CMPT310/searchAssignment/requirements.txt",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PythonContentEntriesConfigurable"
   }
@@ -96,7 +92,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/xy_vacuum_environment_search.py</url>
-          <line>461</line>
+          <line>473</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>

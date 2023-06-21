@@ -46,10 +46,12 @@ class VacuumPlanning(Problem):
             sol = path.solution()
             self.env.set_solution(sol)
             self.env.display_explored(explored)
+            self.display_solution(path.solution())
         elif self.searchType == 'DFS':
             path, explored = depth_first_graph_search(self)
             self.env.set_solution(path.solution())
             self.env.display_explored(explored)
+            self.display_solution(path.solution())
         elif self.searchType == 'UCS':
             self.env.solution = best_first_graph_search(self, lambda node: node.execute_cost).solution()
 
@@ -62,6 +64,15 @@ class VacuumPlanning(Problem):
     def generateNextSolution(self):
         self.generateSolution()
 
+    def display_solution(self, path):
+        x, y = self.agent.location
+        positions = []
+        for dir in path:
+            positions.append((x, y))
+            x, y = self.result((x, y), dir)
+
+        for (x, y) in positions:
+            self.env.buttons[y][x].config(bg='blue')
 
     def actions(self, state):
         """ Return the actions that can be executed in the given state.
