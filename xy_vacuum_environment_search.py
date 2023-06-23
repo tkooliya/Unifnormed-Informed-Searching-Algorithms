@@ -161,7 +161,7 @@ class VacuumPlanning(Problem):
         z2 = math.sqrt(x2*x2 + y2*y2)
         distance = (x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2
 
-        print("path_cost: students must modify this cost using the above comment.")
+        #print("path_cost: students must modify this cost using the above comment.")
         return c + abs(distance)
 
 
@@ -265,6 +265,8 @@ class Gui(VacuumEnvironment):
         self.explored = set()
         self.read_env()
 
+
+
     def create_frames(self, h):
         """Adds h row frames to the GUI environment."""
         self.frames = []
@@ -331,7 +333,10 @@ class Gui(VacuumEnvironment):
 
         self.explored = explored
         for (x, y) in explored:
+            sleep(0.05)
             self.buttons[y][x].config(bg='pink')
+            self.buttons[yi][xi].config(text=agent_label(self.agent), state='disabled', disabledforeground='black')
+            Tk.update(self.root)
 
         self.buttons[yi][xi].config(text=agent_label(self.agent), state='disabled', disabledforeground='black')
 
@@ -429,7 +434,7 @@ class Gui(VacuumEnvironment):
             self.execute_action(self.agent, move)
 
 
-    def run(self, delay=0.5):
+    def run(self, delay=0.20):
         """Run the Environment for given number of time steps,"""
         self.running = True
 
@@ -527,3 +532,8 @@ if __name__ == "__main__":
     searchTypeStr_dropdown.pack(side='left')
 
     win.mainloop()
+
+
+
+
+
