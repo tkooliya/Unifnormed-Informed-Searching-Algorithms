@@ -3,6 +3,7 @@ from tkinter import *
 from agents import *
 from search import *
 import sys
+import math
 import copy
 from utils import PriorityQueue
 
@@ -42,19 +43,42 @@ class VacuumPlanning(Problem):
         self.state = env.agent.location
         super().__init__(self.state)
         if self.searchType == 'BFS':
-            path, explored = breadth_first_graph_search(self)
-            sol = path.solution()
-            self.env.set_solution(sol)
-            self.env.display_explored(explored)
-        elif self.searchType == 'DFS':
-            path, explored = depth_first_graph_search(self)
-            self.env.set_solution(path.solution())
-            self.env.display_explored(explored)
-        elif self.searchType == 'UCS':
-            self.env.solution = best_first_graph_search(self, lambda node: node.execute_cost).solution()
+            try:
+                path, explored = breadth_first_graph_search(self)
+                sol = path.solution()
+                self.env.set_solution(sol)
+                self.env.display_explored(explored)
+                self.display_solution(path.solution())
+            except:
+                raise(Exception("ERROR: The board is unsolvable!"))
 
+        elif self.searchType == 'DFS':
+            try:
+                path, explored = depth_first_graph_search(self)
+                self.env.set_solution(path.solution())
+                self.env.display_explored(explored)
+                self.display_solution(path.solution())
+            except:
+                raise(Exception("ERROR: The board is unsolvable!"))
+
+        elif self.searchType == 'UCS':
+            try:
+                path, explored = best_first_graph_search(self, lambda node: node.path_cost)
+                sol = path.solution()
+                self.env.set_solution(sol)
+                self.env.display_explored(explored)
+                self.display_solution(path.solution())
+            except:
+                raise (Exception("ERROR: The board is unsolvable!"))
         elif self.searchType == 'A*':
-            self.env.solution = astar_search(self.searchAgent).solution()
+            try:
+                path, explored = astar_search(self)
+                sol = path.solution()
+                self.env.set_solution(sol)
+                self.env.display_explored(explored)
+                self.display_solution(path.solution())
+            except:
+                raise (Exception("ERROR: The board is unsolvable!"))
         else:
             raise 'NameError'
 
@@ -62,6 +86,16 @@ class VacuumPlanning(Problem):
     def generateNextSolution(self):
         self.generateSolution()
 
+    def display_solution(self, path):
+    #need a try and catch statement!
+        x, y = self.agent.location
+        positions = []
+        for dir in path:
+            positions.append((x, y))
+            x, y = self.result((x, y), dir)
+
+        for (x, y) in positions:
+            self.env.buttons[y][x].config(bg='blue')
 
     def actions(self, state):
         """ Return the actions that can be executed in the given state.
@@ -92,9 +126,6 @@ class VacuumPlanning(Problem):
             elif(isinstance(object, Wall) and dy < 0):
                 possible_actions.remove('DOWN')
 
-        print(possible_actions)
-
-
         return possible_actions
 
     def result(self, state, action):
@@ -117,22 +148,52 @@ class VacuumPlanning(Problem):
 
 
     def path_cost(self, c, state1, action, state2):
+        x1, y1 = state1
+        x2, y2 = state2
+
         """To be used for UCS and A* search. Returns the cost of a solution path that arrives at state2 from
         state1 via action, assuming cost c to get up to state1. For our problem
         state is (x, y) coordinate pair. To make our problem more interesting we are going to associate
         a height to each state as z = sqrt(x*x + y*y). This effectively means our grid is a bowl shape and
         the center of the grid is the center of the bowl. So now the distance between 2 states become the
         square of Euclidean distance as distance = (x1-x2)^2 + (y1-y2)^2 + (z1-z2)^2"""
-        print("path_cost: students must modify this cost using the above comment.")
-        return c + 1
+        z1 = math.sqrt(x1*x1 + y1*y1)
+        z2 = math.sqrt(x2*x2 + y2*y2)
+        distance = (x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2
+
+        #print("path_cost: students must modify this cost using the above comment.")
+        return c + abs(distance)
 
 
     def h(self, node):
         """ to be used for A* search. Return the heuristic value for a given state. For this problem use minimum Manhattan
-        distance to all the dirty rooms + absolute value of height distance as described above in path_cost() function. .
-    """
-        print("h (heuristic): to be defined and implemented by students.")
-        return 0
+        distance to all the dirty rooms + absolute value of height distance as described above in path_cost() function. ."""
+        g = node.path_cost
+        dirt = []
+        hcost = []
+        manhattan = []
+        xi, yi = self.agent.location
+        for j, btn_row in enumerate(self.env.buttons):
+            for i, btn in enumerate(btn_row):
+                if (j != 0 and j != len(self.env.buttons) - 1) and (i != 0 and i != len(btn_row) - 1):
+                    if self.env.some_things_at((i, j)):
+                        for thing in self.env.list_things_at((i, j)):
+                            if isinstance(thing, Dirt):
+                                dirt.append((i,j)) #Add coordinates relating to dirt piles
+        print(self.agent.location)
+        nx, ny = node.state
+
+        for xd, yd in dirt:
+            manhattan.append(abs(xi - xd) + abs(yi - yd))
+
+        for (dirtx, dirty) in dirt:
+            hcost.append(abs(nx - dirtx) + abs(ny - dirty))
+
+        totalcost = manhattan + hcost
+
+
+        #print("h (heuristic): to be defined and implemented by students.")
+        return min(totalcost)
 
 # ______________________________________________________________________________
 
@@ -204,6 +265,8 @@ class Gui(VacuumEnvironment):
         self.explored = set()
         self.read_env()
 
+
+
     def create_frames(self, h):
         """Adds h row frames to the GUI environment."""
         self.frames = []
@@ -218,7 +281,7 @@ class Gui(VacuumEnvironment):
         for frame in self.frames:
             button_row = []
             for _ in range(w):
-                button = Button(frame, bg='white', state='normal', height=3, width=5, padx=3, pady=3)
+                button = Button(frame, bg='white', state='normal', height=2, width=3, padx=3, pady=3)
                 button.config(command=lambda btn=button: self.toggle_element(btn))
                 button.pack(side='left')
                 button_row.append(button)
@@ -270,7 +333,10 @@ class Gui(VacuumEnvironment):
 
         self.explored = explored
         for (x, y) in explored:
+            sleep(0.05)
             self.buttons[y][x].config(bg='pink')
+            self.buttons[yi][xi].config(text=agent_label(self.agent), state='disabled', disabledforeground='black')
+            Tk.update(self.root)
 
         self.buttons[yi][xi].config(text=agent_label(self.agent), state='disabled', disabledforeground='black')
 
@@ -368,15 +434,20 @@ class Gui(VacuumEnvironment):
             self.execute_action(self.agent, move)
 
 
-    def run(self, delay=0.5):
+    def run(self, delay=0.20):
         """Run the Environment for given number of time steps,"""
         self.running = True
+
         for step in range(1000):
             if env.dirtCount == 0:
                 return
-            self.update_env()
-            sleep(delay)
-            Tk.update(self.root)
+            try:
+                self.update_env()
+                sleep(delay)
+                Tk.update(self.root)
+            except Exception as e:
+                print(e)
+                break
         print("ERROR: A solution was not reachable")
 
     def reset_env(self):
@@ -461,3 +532,8 @@ if __name__ == "__main__":
     searchTypeStr_dropdown.pack(side='left')
 
     win.mainloop()
+
+
+
+
+
